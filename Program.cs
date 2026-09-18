@@ -4,10 +4,19 @@ using learn_english_backend.Middlewares;
 var builder = WebApplication.CreateBuilder(args);
 
 const string frontendCorsPolicy = "Frontend";
-var allowedOrigins = builder.Configuration
+var rawOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
     .Get<string[]>()
-    ?? ["http://localhost:5173", "http://127.0.0.1:5173"];
+    ?? [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://learn-english-myhoa.vercel.app"
+    ];
+
+var allowedOrigins = rawOrigins
+    .Select(origin => origin.TrimEnd('/'))
+    .Distinct(StringComparer.OrdinalIgnoreCase)
+    .ToArray();
 
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddApplicationIdentity();
